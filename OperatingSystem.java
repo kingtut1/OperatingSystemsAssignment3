@@ -8,6 +8,7 @@ public class OperatingSystem {
     // Cache that holds address and the time to ping the destination
     // first index is the address; second index is the ping value
     static int[][] Cache = new int[10][2];
+    static int lastIndex = 0;
     // Queue< Pair<Integer, Integer> > Cache = new LinkedList<Integer>();
     static Semaphore mutex = new Semaphore(1, true);
     static Random random = new Random();
@@ -56,12 +57,15 @@ public class OperatingSystem {
         }
         if (!destinationFound) {
             System.out.println("Didn't find the address in the cache adding it to the cache");
-            // Didn't find the address in the cache creating that address (always the last
-            // index (9))
+            // Didn't find the address in the cache creating that address
             // Generate a ping
             int randomPing = random.nextInt(10 - 1 + 1) + 1;
-            Cache[9][0] = destinationAddress;
-            Cache[9][1] = randomPing;
+            Cache[lastIndex][0] = destinationAddress;
+            Cache[lastIndex][1] = randomPing;
+
+            if(lastIndex != 9){
+                lastIndex++;
+            }
         }
     }
 
