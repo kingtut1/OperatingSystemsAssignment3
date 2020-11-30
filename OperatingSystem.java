@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -21,53 +23,85 @@ public class OperatingSystem {
         }
 
         public void run() {
-            try {
-                mutex.acquire();
-                System.out.println(id + " is acquired the mutex");
+            while (true) {
 
-                // Choose random query between 1 and 100
-                int randomAddress = random.nextInt(100 - 1 + 1) + 1;
-                System.out.println("Generated Address:" + randomAddress);
-                BestRoutes(randomAddress);
+                try {
+                    //mutex.acquire();
+                    //System.out.println(id + " has acquired the mutex");
 
-            } catch (Exception e) {
-                System.out.println(e);
-            } finally {
-                System.out.println("Cache after operations");
-                System.out.println(Arrays.deepToString(Cache));
-                System.out.println(id + " is releasing the mutex");
-                mutex.release();
+                    // Choose random query between 1 and 100
+                    int randomAddress = random.nextInt(100 - 1 + 1) + 1;
+                    //System.out.println("Generated Address:" + randomAddress);
+                    mutex.acquire();
+                    int ping = GetDestinationPing(randomAddress);
+                    if(ping == -1){
+                        //Release the mutex and put into cache
+                        mutex.release();
+                        //Ping the sytem
+                        ping = random.nextInt(10 - 1 + 1) + 1;
+                        mutex.acquire();
+                        System.out.print("Thread " + id + " ");
+                        putInCache(randomAddress, ping);
+                        mutex.release();
+                    }
+                    else{
+                        System.out.println("ID: " + id + " the cache's ping at " + randomAddress + " is " + ping);
+                        mutex.release();
+                    }
+
+                } catch (Exception e) {
+                    System.out.println(e);
+                } finally {
+                    //System.out.println("Cache after operations");
+                    //System.out.println(Arrays.deepToString(Cache));
+                    //System.out.println(id + " is releasing the mutex");
+                    //mutex.release();
+                }
             }
         }
     }
 
-    // Check if destination exists in current cache. If it does changes that value
-    // else overwrites a space.
-    private static void BestRoutes(int destinationAddress) {
-        boolean destinationFound = false;
+    // Check if destination exists in current cache else return false
+    private static int GetDestinationPing(int destinationAddress) {
         for (int i = 0; i < 10; i++) {
-            System.out.println("Cache[i][0]:" + Cache[i][0]);
             // Checking the cache for the address
             if (Cache[i][0] == destinationAddress) {
-                // Generate a ping
-                int randomPing = random.nextInt(10 - 1 + 1) + 1;
-                Cache[i][1] = randomPing;
-                destinationFound = true;
+                //Returns the destination's ping value
+                return Cache[i][1];
             }
         }
-        if (!destinationFound) {
-            System.out.println("Didn't find the address in the cache adding it to the cache");
-            // Didn't find the address in the cache creating that address
-            // Generate a ping
-            int randomPing = random.nextInt(10 - 1 + 1) + 1;
-            Cache[lastIndex][0] = destinationAddress;
-            Cache[lastIndex][1] = randomPing;
-
-            if(lastIndex != 9){
-                lastIndex++;
-            }
-        }
+        return -1;
     }
+
+    private static void putInCache(int destinationAddress, int destinationPing){
+            //Checking to see if address is in the cache
+            int ping = GetDestinationPing(destinationAddress);
+            if(ping == -1){
+                //Hasn't been added in time since last call
+                
+                Cache[lastIndex][0] = destinationAddress;
+                Cache[lastIndex][1] = destinationPing;
+                if (lastIndex != 9) {
+                    lastIndex++;
+                }
+                System.out.println("has had nothing added since last time so succesfully added");
+            }
+            else{
+                //Has been added to the cahce in the time since last call
+                for (int i = 0; i < 10; i++) {
+                    // Checking the cache for the address
+                    if (Cache[i][0] == destinationAddress) {
+                        Cache[i][1] = destinationPing; 
+                    }
+                }
+                System.out.println("has had something added thus updating");
+            }
+            System.out.println("Cache after operations");
+            System.out.println(Arrays.deepToString(Cache));
+
+    }
+
+
 
     public static void main(String[] args) {
         // int[][] Cache = new int[10][2];
@@ -78,6 +112,13 @@ public class OperatingSystem {
         DecisionThread thread5 = new DecisionThread("5");
         DecisionThread thread6 = new DecisionThread("6");
         DecisionThread thread7 = new DecisionThread("7");
+        try {
+            PrintStream o = new PrintStream(new File("Text.txt"));
+            System.setOut(o);
+        } catch (Exception e) {
+            System.out.println(e);
+            System.out.println("Unable to set Output to file instead of console");
+        }
         thread1.start();
         thread2.start();
         thread3.start();
@@ -85,6 +126,7 @@ public class OperatingSystem {
         thread5.start();
         thread6.start();
         thread7.start();
+        
 
         /*
          * int destinationId = 9; Cache[0][0] = 9; //Address Cache[0][1] = 3; //Ping
