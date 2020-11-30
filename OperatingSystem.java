@@ -11,6 +11,7 @@ public class OperatingSystem {
     // first index is the address; second index is the ping value
     static int[][] Cache = new int[10][2];
     static int lastIndex = 0;
+    static int firstIndex = 0;
     // Queue< Pair<Integer, Integer> > Cache = new LinkedList<Integer>();
     static Semaphore mutex = new Semaphore(1, true);
     static Random random = new Random();
@@ -39,6 +40,7 @@ public class OperatingSystem {
                         mutex.release();
                         //Ping the sytem
                         ping = random.nextInt(10 - 1 + 1) + 1;
+                        //Thread sleep
                         mutex.acquire();
                         System.out.print("Thread " + id + " ");
                         putInCache(randomAddress, ping);
@@ -79,11 +81,21 @@ public class OperatingSystem {
             if(ping == -1){
                 //Hasn't been added in time since last call
                 
-                Cache[lastIndex][0] = destinationAddress;
-                Cache[lastIndex][1] = destinationPing;
-                if (lastIndex != 9) {
+                if (lastIndex <= 9) {
+                    Cache[lastIndex][0] = destinationAddress;
+                    Cache[lastIndex][1] = destinationPing;
                     lastIndex++;
                 }
+                else{
+                    //Removing the front of the queue
+                    if(firstIndex > 9){
+                        firstIndex = 0;
+                    }
+                    Cache[firstIndex][0] = destinationAddress;
+                    Cache[firstIndex][1] = destinationPing;
+                    firstIndex++;
+                }
+
                 System.out.println("has had nothing added since last time so succesfully added");
             }
             else{
@@ -104,7 +116,6 @@ public class OperatingSystem {
 
 
     public static void main(String[] args) {
-        // int[][] Cache = new int[10][2];
         DecisionThread thread1 = new DecisionThread("1");
         DecisionThread thread2 = new DecisionThread("2");
         DecisionThread thread3 = new DecisionThread("3");
@@ -126,15 +137,5 @@ public class OperatingSystem {
         thread5.start();
         thread6.start();
         thread7.start();
-        
-
-        /*
-         * int destinationId = 9; Cache[0][0] = 9; //Address Cache[0][1] = 3; //Ping
-         * value System.out.println(Arrays.deepToString(Cache)); for( int i = 0; i < 10;
-         * i++){ System.out.println("Cache["+i+"][0]:"+ Cache[i][0]); if(Cache[i][0] ==
-         * destinationId){
-         * 
-         * } }
-         */
     }
 }
