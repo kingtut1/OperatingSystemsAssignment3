@@ -27,12 +27,8 @@ public class OperatingSystem {
             while (true) {
 
                 try {
-                    //mutex.acquire();
-                    //System.out.println(id + " has acquired the mutex");
-
                     // Choose random query between 1 and 100
                     int randomAddress = random.nextInt(100 - 1 + 1) + 1;
-                    //System.out.println("Generated Address:" + randomAddress);
                     mutex.acquire();
                     int ping = GetDestinationPing(randomAddress);
                     if(ping == -1){
@@ -54,10 +50,7 @@ public class OperatingSystem {
                 } catch (Exception e) {
                     System.out.println(e);
                 } finally {
-                    //System.out.println("Cache after operations");
-                    //System.out.println(Arrays.deepToString(Cache));
-                    //System.out.println(id + " is releasing the mutex");
-                    //mutex.release();
+                   
                 }
             }
         }
