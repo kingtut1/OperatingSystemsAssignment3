@@ -1,8 +1,4 @@
-import java.io.File;
-import java.io.PrintStream;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
@@ -10,9 +6,9 @@ public class OperatingSystem {
     // Cache that holds address and the time to ping the destination
     // first index is the address; second index is the ping value
     static int[][] Cache = new int[10][2];
+
     static int lastIndex = 0;
     static int firstIndex = 0;
-    // Queue< Pair<Integer, Integer> > Cache = new LinkedList<Integer>();
     static Semaphore mutex = new Semaphore(1, true);
     static Random random = new Random();
 
@@ -27,37 +23,32 @@ public class OperatingSystem {
             while (true) {
 
                 try {
-                    //mutex.acquire();
-                    //System.out.println(id + " has acquired the mutex");
-
                     // Choose random query between 1 and 100
                     int randomAddress = random.nextInt(100 - 1 + 1) + 1;
-                    //System.out.println("Generated Address:" + randomAddress);
+                    
+                    //Acquire the mutex in order to check if address in cache
                     mutex.acquire();
                     int ping = GetDestinationPing(randomAddress);
                     if(ping == -1){
-                        //Release the mutex and put into cache
+                        //Case 1: Release the mutex and put into cache
                         mutex.release();
-                        //Ping the sytem
+                        //Ping the sytem and thread sleeps what ever time is randomly chosen(milliseconds)
                         ping = random.nextInt(10 - 1 + 1) + 1;
-                        //Thread sleep
+                        Thread.sleep(ping);
+
                         mutex.acquire();
                         System.out.print("Thread " + id + " ");
                         putInCache(randomAddress, ping);
                         mutex.release();
                     }
                     else{
+                        //Case 2: Address in cache thus display ping and release mutex
                         System.out.println("ID: " + id + " the cache's ping at " + randomAddress + " is " + ping);
                         mutex.release();
                     }
 
                 } catch (Exception e) {
                     System.out.println(e);
-                } finally {
-                    //System.out.println("Cache after operations");
-                    //System.out.println(Arrays.deepToString(Cache));
-                    //System.out.println(id + " is releasing the mutex");
-                    //mutex.release();
                 }
             }
         }
@@ -123,13 +114,10 @@ public class OperatingSystem {
         DecisionThread thread5 = new DecisionThread("5");
         DecisionThread thread6 = new DecisionThread("6");
         DecisionThread thread7 = new DecisionThread("7");
-        try {
-            PrintStream o = new PrintStream(new File("Text.txt"));
-            System.setOut(o);
-        } catch (Exception e) {
-            System.out.println(e);
-            System.out.println("Unable to set Output to file instead of console");
-        }
+        DecisionThread thread8 = new DecisionThread("8");
+        DecisionThread thread9 = new DecisionThread("9");
+        DecisionThread thread10 = new DecisionThread("10");
+        
         thread1.start();
         thread2.start();
         thread3.start();
@@ -137,5 +125,8 @@ public class OperatingSystem {
         thread5.start();
         thread6.start();
         thread7.start();
+        thread8.start();
+        thread9.start();
+        thread10.start();
     }
 }
