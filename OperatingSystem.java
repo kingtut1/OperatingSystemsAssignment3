@@ -1,5 +1,3 @@
-import java.io.File;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
@@ -120,13 +118,6 @@ public class OperatingSystem {
         DecisionThread thread9 = new DecisionThread("9");
         DecisionThread thread10 = new DecisionThread("10");
         
-        try {
-            PrintStream o = new PrintStream(new File("Text.txt"));
-            System.setOut(o);
-        } catch (Exception e) {
-            System.out.println(e);
-            System.out.println("Unable to set Output to file instead of console");
-        }
         thread1.start();
         thread2.start();
         thread3.start();
